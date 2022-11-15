@@ -1,6 +1,6 @@
 #include <xc.h>
 #include <stdio.h>
-#define FCY 32000000UL
+#define FCY 16000000UL
 #include <libpic30.h> // __delayXXX() functions macros defined here
 #include <pps.h>
 
