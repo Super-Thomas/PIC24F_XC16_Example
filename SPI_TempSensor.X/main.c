@@ -29,6 +29,9 @@
 #pragma config GCP = OFF                // General Code Segment Code Protect (Code protection is disabled)
 #pragma config JTAGEN = OFF             // JTAG Port Enable (JTAG port is disabled)
 
+#define AVG_COUNT   32
+
+
 void PPS_Init(void)
 {
     PPSUnLock;
@@ -145,6 +148,10 @@ int main(void)
     int16_t s16ExtTempRaw = 0;
     int16_t s16IntTempRaw = 0;
     
+    int32_t s32SumExtTempRaw = 0;
+    uint8_t u8Count = 0;
+    float fExtTemp = 0.0f;
+    
     PPS_Init();
     SPI1_Init();
     UART2_Init();
@@ -203,12 +210,23 @@ int main(void)
                 s16IntTempRaw = ~(s16IntTempRaw & 0x7FF);
             }
             
-            printf("Ext Temp: %.2f\n", (double)(s16ExtTempRaw * 0.25f));
-            printf("Int Temp: %.2f\n", (double)(s16IntTempRaw * 0.0625f));
+            //printf("Ext Temp: %.2f\n", (double)(s16ExtTempRaw * 0.25f));
+            //printf("Int Temp: %.2f\n", (double)(s16IntTempRaw * 0.0625f));
+            s32SumExtTempRaw += s16ExtTempRaw;
+            u8Count++;
+            
+            if (u8Count == AVG_COUNT)
+            {
+                fExtTemp = (s32SumExtTempRaw / AVG_COUNT) * 0.25f;
+                printf("Ext Temp: %.2f\n", fExtTemp);
+                u8Count = 0;
+                s32SumExtTempRaw = 0;
+            }
         }
+        
         PORTFbits.RF2 = 1;
 
-        __delay_ms(200);
+        __delay_ms(10);
     }
     
     return 0;
